@@ -1,0 +1,67 @@
+dist:     trusty    # используем Ubuntu 14.04 Trusty Tahr (а не 12.02 Precise Pangolin)
+sudo:     required  # используем Virtual Machine (а не Docker container)
+
+language: c       # на практике разницы между специфичным для C++ окружением
+                    # и, скажем, python -- никакой. Но пусть будет cpp.
+
+os:
+    # будем прогонять CI и на Linux, и на Mac OS X...
+    - linux
+      #- osx
+
+compiler:
+    # ... и с помощью GCC, и Clang
+    - gcc
+      #- clang
+
+env:
+    # список переменных окружения, влияющих на матрицу сборки:
+    - TARGET_CPU=amd64 BUILD_CONFIGURATION=Debug
+    - TARGET_CPU=amd64 BUILD_CONFIGURATION=Release
+      #- TARGET_CPU=x86 BUILD_CONFIGURATION=Debug
+      #- TARGET_CPU=x86 BUILD_CONFIGURATION=Release
+
+matrix:
+    exclude:
+        # вручную исключим ненужные элементы из матрицы сборки:
+        # - os:       osx
+        # compiler: gcc
+
+            #- os:  osx
+            #env: TARGET_CPU=x86 BUILD_CONFIGURATION=Debug
+
+            #- os:  osx
+            #env: TARGET_CPU=x86 BUILD_CONFIGURATION=Release
+
+install:
+    # скрипт настройки среды и установки зависимостей:
+    - source ci/travis/install-$TRAVIS_OS_NAME.sh
+
+script:
+    # скрипт сборки и тестирования проекта:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU
+    - cmake --build .
+    - ctest --output-on-failure
+
+deploy:
+    # выкладываем tagged-коммиты на GitHub Releases:
+    provider:     releases
+    file:         <package-file>
+    skip_cleanup: true
+    overwrite:    true
+
+    api_key:
+        secure:   <encrypted-github-token>
+
+    on:
+        tags:     true
+
+script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU
+    - cmake --build .
+
+secure: "g5Xe4yr0fQVcOPYLdQddZ8+BX8uNiItaY2579oXQSD84mbGU1yiGXXC/LQAxeO8KDYoIC4A52J4KppjojwAn+k29aU9N9PoNR3m8lS8Knl0hlR8Q0MR1fhWr1CdyqpxW98giTzTtXVCojrKSZ254V4AXq45CIPuXK/XB/yZEQBfCIwRlrBGTWtoR450o4qKB9mrQ3OLSgO6q6Hi3svDCz4a9XbzFmUbbYhnGSoDSXUg5opqzWD5g6ljfXQDjuAS2UbqlKBYqWUfIqxbkjHG14VDlRBj6frKEUTTsHD61Bv0jnn+u+Jk/EuK6Am9zscvkmV0hPzyp/K94QQuEf5RsBiANh6y0vgQHteZOhBbdUvolZFeb7P02wkFvZH1DmP3o8hF78TmILz+mDfvGjJbstpi8k15X3qFV8j8WF7WklgNjGQJYez1PGHVpKlssG7wQbhpG+/IWej5P5f7Owyc0wnTPCNNWRRWJXBVM55v3Qll6N/5/8sF57mA9y2ulglEmhIH02n9+HlqMjZtU0bFc4cn/Hp3OMz5tbm9cIBitaZB6B3srAJwObLW6U2E/ybwJkmvVlxnX4OgrhHfxrkiM1+85Khuu/booxpVUdBPC8lmnxqfw+3Bw375nxsGkQ1fhOKz8ZmvPJDKj2k0MEp6HNb+r5pc8KH6yAtHHx8UiNMM="
