@@ -1,3 +1,0 @@
-/home/purplelime/TP_IZ1_Films/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/purplelime/TP_IZ1_Films/cmake-build-debug/CMakeFiles/TP_IZ1_Films.dir
-/home/purplelime/TP_IZ1_Films/cmake-build-debug/CMakeFiles/edit_cache.dir
